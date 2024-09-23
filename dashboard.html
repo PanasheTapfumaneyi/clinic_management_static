@@ -1,0 +1,166 @@
+<!-- Dashboard Section -->
+<section id="dashboard" class="page">
+    <div class="grid grid-cols-4 gap-6 mb-6">
+        <!-- Total Patients -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-gray-600 font-semibold">Total Patients</h2>
+            <p class="text-3xl font-bold text-red-500">1</p>
+        </div>
+        <!-- Total Doctors -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-gray-600 font-semibold">Total Doctors</h2>
+            <p class="text-3xl font-bold text-yellow-500">1</p>
+        </div>
+        <!-- Total Appointments -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-gray-600 font-semibold">Total Appointments</h2>
+            <p class="text-3xl font-bold text-green-500">0</p>
+        </div>
+        <!-- Total Revenue -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-gray-600 font-semibold">Total Revenue</h2>
+            <p class="text-3xl font-bold text-teal-500">$0/-</p>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-gray-600 font-semibold">Upcoming Appointments</h2>
+        <ul class="mt-4">
+            <li class="border-b py-2 flex justify-between">
+                <span>John Doe - 10:00 AM</span>
+                <span class="text-sm text-gray-500">Sep 22, 2024</span>
+            </li>
+            <li class="border-b py-2 flex justify-between">
+                <span>Jane Smith - 11:00 AM</span>
+                <span class="text-sm text-gray-500">Sep 22, 2024</span>
+            </li>
+            <!-- Add more appointments as needed -->
+        </ul>
+    </div>
+
+    <!-- Patient Notifications -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-gray-600 font-semibold">Patient Notifications</h2>
+        <ul class="mt-4">
+            <li class="border-b py-2 flex justify-between">
+                <span>New message from John Doe</span>
+                <span class="text-sm text-gray-500">5 mins ago</span>
+            </li>
+            <li class="border-b py-2 flex justify-between">
+                <span>Prescription request from Jane Smith</span>
+                <span class="text-sm text-gray-500">10 mins ago</span>
+            </li>
+            <!-- Add more notifications as needed -->
+        </ul>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-gray-600 font-semibold">Recent Activity</h2>
+        <ul class="mt-4">
+            <li class="border-b py-2 flex justify-between">
+                <span>Added note for John Doe</span>
+                <span class="text-sm text-gray-500">Yesterday</span>
+            </li>
+            <li class="border-b py-2 flex justify-between">
+                <span>Sent message to Jane Smith</span>
+                <span class="text-sm text-gray-500">2 days ago</span>
+            </li>
+            <!-- Add more activity as needed -->
+        </ul>
+    </div>
+
+    <!-- Statistics -->
+    <div class="bg-white p-4 rounded-lg shadow mb-6">
+        <h2 class="text-gray-600 font-semibold">Statistics</h2>
+        <div class="mt-4">
+            <p class="font-semibold text-gray-500">Patients This Week: <span
+                    class="text-2xl font-bold text-blue-500">5</span></p>
+            <p class="font-semibold text-gray-500">Pending Tasks: <span
+                    class="text-2xl font-bold text-orange-500">2</span></p>
+        </div>
+    </div>
+</section>
+
+<!-- Drawer Toggle Button -->
+<button onclick="toggleDrawer()"
+    class="fixed right-0 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-l-lg">
+    Quick Actions
+</button>
+
+<!-- Quick Actions Drawer -->
+<div id="quick-actions-drawer"
+    class="fixed right-0 top-0 h-full w-64 bg-gray-100 shadow-lg transform translate-x-full transition-transform duration-300">
+    <div class="p-4">
+        <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+        <button onclick="openNewAppointmentForm()"
+            class="block w-full text-left mb-2 bg-blue-500 text-white px-3 py-2 rounded-lg">New Appointment</button>
+        <button onclick="openPrescriptionForm()"
+            class="block w-full text-left mb-2 bg-green-500 text-white px-3 py-2 rounded-lg">Send Prescription</button>
+        <button onclick="openPatientSearch()"
+            class="block w-full text-left mb-2 bg-yellow-500 text-white px-3 py-2 rounded-lg">Patient Search</button>
+        <div class="mt-4">
+            <h4 class="text-sm font-semibold mb-2">Messages Overview</h4>
+            <!-- Recent Messages Display -->
+            <div class="bg-white border rounded-lg p-2">
+                <div class="mb-2">
+                    <p><strong>John Doe:</strong> "Please send the prescription."</p>
+                    <button onclick="replyMessage()" class="text-blue-500 text-sm">Reply</button>
+                    <button onclick="viewFullMessage()" class="text-blue-500 text-sm ml-2">View Full</button>
+                </div>
+                <div>
+                    <p><strong>Jane Smith:</strong> "I have an appointment request."</p>
+                    <button onclick="replyMessage()" class="text-blue-500 text-sm">Reply</button>
+                    <button onclick="viewFullMessage()" class="text-blue-500 text-sm ml-2">View Full</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- New Appointment Form (Initially Hidden) -->
+<div id="new-appointment-form" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">New Appointment</h3>
+        <form id="addAppointmentForm">
+            <div class="mb-2">
+                <label>Service</label>
+                <input id="appointmentService" type="text" class="border p-2 w-full">
+            </div>
+            <div class="mb-2">
+                <label>Charges</label>
+                <input id="appointmentCharges" type="number" class="border p-2 w-full">
+            </div>
+            <div class="mb-2">
+                <label>Payment Mode</label>
+                <input id="appointmentPaymentMode" type="text" class="border p-2 w-full">
+            </div>
+            <div class="mb-2">
+                <label>Status</label>
+                <select id="appointmentStatus" class="border p-2 w-full">
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeNewAppointmentForm()" type="button"
+                    class="mr-2 bg-gray-500 text-white px-3 py-2 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-blue-500 text-white px-3 py-2 rounded-lg">Add Appointment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Patient Search Form (Initially Hidden) -->
+<div id="patient-search" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Patient Search</h3>
+        <input id="searchInput" type="text" class="border p-2 w-full" placeholder="Search by name, email, or ID">
+        <div id="searchResults" class="mt-4"></div>
+        <div class="flex justify-end mt-4">
+            <button onclick="closePatientSearch()" class="bg-gray-500 text-white px-3 py-2 rounded-lg">Close</button>
+        </div>
+    </div>
+</div>

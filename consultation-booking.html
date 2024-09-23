@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Booking</title>
+
+    <link rel="stylesheet" href="src/output.css">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+    <style>
+        @font-face {
+            font-family: 'Aptos';
+            src: url('/fonts/Aptos.ttf') format('ttf');
+        }
+
+        body {
+            font-family: 'Aptos';
+        }
+
+        /* Styles for white container */
+        .white-box {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 1000px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Centering content vertically and horizontally */
+        .container-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        /* Button fixed at the bottom */
+        .bottom-btns {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Tracker step styles */
+        .tracker-step {
+            width: 30px;
+            height: 30px;
+            background-color: lightgray;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tracker-step.active {
+            background-color: turquoise;
+            color: white;
+        }
+
+        .tracker {
+            margin-bottom: 30px;
+        }
+
+        /* Vertical line style */
+        .vertical-divider {
+            border-left: 1px solid #e2e2e2;
+            height: 100%;
+            margin: 0 20px;
+        }
+
+        /* Section margin */
+        .section-margin {
+            margin-top: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .booking-container {
+                flex-direction: column;
+            }
+
+            .vertical-divider {
+                display: none;
+            }
+        }
+
+        /* Calendar styles */
+        .calendar-container {
+            width: 60%;
+        }
+
+        .flatpickr-calendar {
+            width: 100%;
+        }
+
+        /* Styles for time buttons */
+        .time-button {
+            border: 1px solid #ccc;
+            background-color: #f7f7f7;
+            color: #333;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .time-button:hover {
+            background-color: #e2e2e2;
+        }
+
+        .time-button.selected {
+            background-color: #4f46e5;
+            color: white;
+        }
+
+        /* Adjust the times container */
+        .times-container {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-summary {
+            width: 60%;
+            /* Set width to 60% of the container */
+        }
+
+        .call-type-button {
+            background-color: #f3f4f6;
+            /* Light gray background */
+            color: #1f2937;
+            /* Dark text */
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            /* Slightly rounded corners */
+            border: 1px solid #d1d5db;
+            /* Light border */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .call-type-button.selected {
+            background-color: #3b82f6;
+            /* Primary blue when selected */
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="h-screen w-screen bg-cover bg-center bg-no-repeat"
+    style="background-image: url('/assets/MainBackground.png');">
+
+    <div class="container-center pt-20">
+        <div class="white-box">
+            <div class="tracker flex justify-between mb-6">
+                <div class="tracker-step active">1</div>
+                <div class="tracker-step">2</div>
+                <div class="tracker-step">3</div>
+            </div>
+
+            <div id="step-1" class="form-step active">
+                <div class="booking-container flex justify-between">
+                    <div class="description w-1/4 pr-4">
+                        <h2 class="text-lg font-semibold">Initial Consultation</h2>
+                        <p class="mt-2">Book your 20-minute consultation with one of our friendly nurses, which
+                            includes:</p>
+                        <ul class="list-disc list-inside mt-2">
+                            <li>Speaking to a qualified clinician</li>
+                            <li>Deep medical knowledge</li>
+                            <li>Discussion of physical and mental health conditions</li>
+                        </ul>
+                        <p class="mt-4 text-sm"><strong>Duration:</strong> 20 mins</p>
+                        <p class="text-sm"><strong>Mode:</strong> Link meeting</p>
+                        <p class="text-sm"><strong>Timezone:</strong> Australia/Brisbane</p>
+                    </div>
+
+                    <div class="vertical-divider"></div>
+
+                    <div class="calendar-container section-margin">
+                        <h3 class="text-lg font-semibold mb-4">Select Date</h3>
+                        <div class="flex">
+                            <div class="w-full">
+                                <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden flex">
+                                    <div class="w-full p-6">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h2 id="currentMonth" class="text-xl font-semibold"></h2>
+                                            <div class="flex">
+                                                <button id="prevMonth" class="w-6 h-6 text-gray-500 cursor-pointer">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                                    </svg>
+                                                </button>
+                                                <button id="nextMonth"
+                                                    class="w-6 h-6 text-gray-500 cursor-pointer ml-2">
+                                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-7 gap-2 mb-2">
+                                            <div class="text-center text-sm font-medium text-gray-500">MON</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">TUE</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">WED</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">THU</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">FRI</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">SAT</div>
+                                            <div class="text-center text-sm font-medium text-gray-500">SUN</div>
+                                        </div>
+                                        <div id="calendarDays" class="grid grid-cols-7 gap-2"></div>
+                                        <div class="mt-4">
+                                            <h3 id="selectedDate" class="text-lg font-semibold mb-2"></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vertical-divider"></div>
+
+                    <div class="times-container section-margin">
+                        <div class="switch-btn flex space-x-2 mb-4">
+                            <button id="toggle12h" class="time-button" onclick="toggleTimeFormat('12h')">12h</button>
+                            <button id="toggle24h" class="time-button" onclick="toggleTimeFormat('24h')">24h</button>
+                        </div>
+
+                        <h3 class="text-lg font-semibold mb-4">Available Times</h3>
+                        <div id="times" class="times-list"></div>
+
+                        <!-- New Call Type Selection Section -->
+                        <h3 class="text-lg font-semibold mb-4 max-h-10">Select Call Type</h3>
+                        <div class="call-type-btns flex space-x-4">
+                            <button id="videoCallBtn" class="call-type-button" onclick="selectCallType('video')">Video
+                                Call</button>
+                            <button id="voiceCallBtn" class="call-type-button" onclick="selectCallType('voice')">Voice
+                                Call</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="bottom-btn bg-primary text-white py-2 px-4 rounded"
+                    onclick="previousStep()">Previous</button>
+                <button class="bottom-btn bg-primary text-white py-2 px-4 rounded" onclick="nextStep()">Next</button>
+
+            </div>
+
+            <div id="step-2" class="form-step hidden">
+                <div class="booking-container flex justify-between">
+                    <div class="description w-1/2 pr-4">
+                        <h2 class="text-lg font-semibold">Personal Information</h2>
+                        <p class="mt-2">Book your consultation with one of the friendly nurses, which includes:</p>
+                        <ul class="list-disc list-inside mt-2">
+                            <li><i class="fa-solid fa-check" style="color: #63E6BE;"></i> Speaking to a qualified
+                                clinician with deep medical knowledge across a range of physical and mental health
+                                conditions.</li>
+                            <li><i class="fa-solid fa-check" style="color: #63E6BE;"></i> Telehealth consultation from
+                                the comfort of your home.</li>
+                            <h2 class="py-2 mt-4"><i class="fa-regular fa-calendar"></i> Wednesday, September 18, 2024
+                                15:20-15:40</h2>
+                            <h2 class="py-2"><i class="fa-regular fa-clock"></i> 20 mins</h2>
+                            <h2 class="py-2"><i class="fa-solid fa-link"></i> Link Meeting</h2>
+                            <h2 class="py-2"><i class="fa-solid fa-globe"></i> Australis/Brisbane</h2>
+                        </ul>
+
+                    </div>
+
+                    <div class="vertical-divider"></div>
+
+                    <div class="form-container w-1/2 section-margin">
+                        <form id="personalInfoForm" action="YOUR_TARGET_URL_HERE" method="POST">
+                            <div class="mb-4">
+                                <label for="name" class="block text-sm font-medium text-gray-700">Your Name*</label>
+                                <input type="text" id="name" name="name" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email
+                                    Address*</label>
+                                <input type="email" id="email" name="email" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="mb-4 flex items-center">
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mr-2">Phone number
+                                    (Incase the clinic needs to reach you)
+                                    Number</label>
+                                <select id="countryCode" name="countryCode" required
+                                    class="mr-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                    <option value="+1">+1 (USA)</option>
+                                    <option value="+44">+44 (UK)</option>
+                                    <option value="+61">+61 (Australia)</option>
+                                    <!-- Add other country codes as needed -->
+                                </select>
+                                <input type="text" id="phone" name="phone" required
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="mb-4">
+                                <input type="checkbox" id="terms" name="terms" required class="mr-2">
+                                <label for="terms" class="text-sm font-medium text-gray-700">I confirm my first and last
+                                    name is as it appears on my Medicare card</label>
+                            </div>
+                            <div class="mb-4">
+                                <input type="checkbox" id="terms" name="terms" required class="mr-2">
+                                <label for="terms" class="text-sm font-medium text-gray-700">I confirm I can make my
+                                    appointment. Nurse appointments are in high demand. Please consider fellow patients
+                                    and avoid booking slots you can't attend. Charges may apply if appointments are
+                                    cancelled with less than 24 hours notice.</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <button class="bottom-btn bg-primary text-white py-2 px-4 rounded"
+                    onclick="previousStep()">Previous</button>
+                <button class="bottom-btn bg-primary text-white py-2 px-4 rounded" onclick="nextStep()">Next</button>
+
+            </div>
+
+            <div id="step-3" class="form-step hidden">
+                <div class="booking-container flex justify-between pt-10">
+                    <!-- Card Details Section -->
+                    <div class="card-details w-2/3 pr-4">
+                        <h2 class="text-lg font-semibold">Payment Details</h2>
+                        <p class="mt-2">Please enter your payment details below:</p>
+                        <form id="paymentForm" action="YOUR_PAYMENT_URL_HERE" method="POST">
+                            <div class="mb-4">
+                                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                <input type="text" id="fullName" name="fullName" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                                <input type="email" id="email" name="email" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="cardNumber" class="block text-sm font-medium text-gray-700">Card
+                                    Number</label>
+                                <input type="text" id="cardNumber" name="cardNumber" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+
+                            <div class="flex mb-4">
+                                <div class="w-1/2 pr-2">
+                                    <label for="expiryDate" class="block text-sm font-medium text-gray-700">Expiry
+                                        Date</label>
+                                    <input type="text" id="expiryDate" name="expiryDate" required
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                </div>
+                                <div class="w-1/2 pl-2">
+                                    <label for="cvv" class="block text-sm font-medium text-gray-700">CVV</label>
+                                    <input type="text" id="cvv" name="cvv" required
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="nameOnCard" class="block text-sm font-medium text-gray-700">Name on
+                                    Card</label>
+                                <input type="text" id="nameOnCard" name="nameOnCard" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                            </div>
+                            <button class="bottom-btn bg-primary text-white py-2 px-4 rounded"
+                                onclick="previousStep()">Previous</button>
+                            <button type="submit" class="bottom-btn bg-primary text-white py-2 px-4 rounded">Submit
+                                Payment</button>
+
+
+                        </form>
+                    </div>
+
+                    <!-- Payment Summary Section -->
+                    <div class="payment-summary pl-4">
+                        <div class="bg-gray-100 rounded-lg shadow-lg p-6 h-full">
+                            <div class="mb-6">
+                                <h3 class="text-lg font-semibold mb-2">Payment Summary</h3>
+                                <p class="text-sm mb-2">Item 1: $50.00</p>
+                                <p class="text-sm mb-2">Item 2: $25.00</p>
+                                <!-- Add more items if needed -->
+                            </div>
+                            <div class="border-t border-gray-300 pt-4">
+                                <p class="text-sm mb-2 font-semibold">Total Cost: $75.00</p>
+                                <p class="text-sm mb-2 font-semibold">Cost Summary: $75.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+        </div>
+    </div>
+
+    <!-- <div class="bottom-btns">
+        <button class="bottom-btn bg-primary text-white py-2 px-4 rounded" onclick="previousStep()">Previous</button>
+        <button class="bottom-btn bg-primary text-white py-2 px-4 rounded" onclick="nextStep()">Next</button>
+    </div> -->
+
+    <script>
+
+        let selectedCallTypeButton = null;
+
+        function selectCallType(type) {
+            // Deselect the previously selected call type button if it exists
+            if (selectedCallTypeButton) {
+                selectedCallTypeButton.classList.remove('selected');
+            }
+
+            // Select the new call type button
+            selectedCallTypeButton = document.getElementById(`${type}CallBtn`);
+            selectedCallTypeButton.classList.add('selected');
+
+            // Log or store the selected call type (video/voice)
+            console.log(`Selected Call Type: ${type}`);
+        }
+
+        const currentMonth = document.getElementById('currentMonth');
+        const calendarDays = document.getElementById('calendarDays');
+        const selectedDate = document.getElementById('selectedDate');
+        let date = new Date();
+        let timeFormat = '24h'; // Default time format
+        let selectedTimeButton = null; // Track the currently selected time button
+
+        function renderCalendar() {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            currentMonth.innerText = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+            calendarDays.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                calendarDays.innerHTML += `<div></div>`;
+            }
+
+            for (let day = 1; day <= lastDate; day++) {
+                calendarDays.innerHTML += `<div class="text-center cursor-pointer hover:bg-gray-200" onclick="selectDate(${day})">${day}</div>`;
+            }
+        }
+
+        let selectedDayElement = null;
+
+        function selectDate(day) {
+            if (selectedDayElement) {
+                selectedDayElement.classList.remove('bg-blue-200');
+            }
+
+            selectedDayElement = document.querySelector(`div[onclick="selectDate(${day})"]`);
+            selectedDayElement.classList.add('bg-blue-200');
+
+            selectedDate.innerText = `Selected Date: ${day} ${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+            updateTimeSlots(); // Update available times when a date is selected
+        }
+
+        function toggleTimeFormat(format) {
+            timeFormat = format;
+            updateTimeSlots();
+        }
+
+        function updateTimeSlots() {
+            const timesList = document.getElementById('times');
+            timesList.innerHTML = '';
+
+            const times = timeFormat === '12h' ? ['2:20 PM', '3:20 PM', '3:40 PM'] : ['14:20', '15:20', '15:40'];
+
+            times.forEach(time => {
+                const button = document.createElement('button');
+                button.className = 'time-button';
+                button.innerText = time;
+                button.onclick = () => selectTime(button);
+                timesList.appendChild(button);
+            });
+        }
+
+        function selectTime(button) {
+            // Deselect the previously selected time button if it exists
+            if (selectedTimeButton) {
+                selectedTimeButton.classList.remove('selected');
+            }
+
+            // Select the new time button
+            selectedTimeButton = button;
+            selectedTimeButton.classList.add('selected');
+        }
+
+        function nextStep() {
+            const activeStep = document.querySelector('.form-step.active');
+            const nextStep = activeStep.nextElementSibling;
+
+            if (nextStep && nextStep.classList.contains('form-step')) {
+                activeStep.classList.remove('active');
+                activeStep.classList.add('hidden');
+                nextStep.classList.remove('hidden');
+                nextStep.classList.add('active');
+
+                const activeTracker = document.querySelector('.tracker-step.active');
+                if (activeTracker.nextElementSibling) {
+                    activeTracker.classList.remove('active');
+                    activeTracker.nextElementSibling.classList.add('active');
+                }
+
+                // Check if we are on step 3
+                if (nextStep.id === 'step-3') {
+                    const bottomBtns = document.querySelector('.bottom-btns');
+                    bottomBtns.innerHTML = '';
+                }
+            }
+        }
+
+
+        function previousStep() {
+            const activeStep = document.querySelector('.form-step.active');
+            const prevStep = activeStep.previousElementSibling;
+
+            if (prevStep && prevStep.classList.contains('form-step')) {
+                activeStep.classList.remove('active');
+                activeStep.classList.add('hidden');
+                prevStep.classList.remove('hidden');
+                prevStep.classList.add('active');
+
+                const activeTracker = document.querySelector('.tracker-step.active');
+                if (activeTracker.previousElementSibling) {
+                    activeTracker.classList.remove('active');
+                    activeTracker.previousElementSibling.classList.add('active');
+                }
+            }
+        }
+
+        document.getElementById('prevMonth').onclick = () => {
+            date.setMonth(date.getMonth() - 1);
+            renderCalendar();
+        };
+
+        document.getElementById('nextMonth').onclick = () => {
+            date.setMonth(date.getMonth() + 1);
+            renderCalendar();
+        };
+
+        // Initialize the calendar on page load
+        renderCalendar();
+        updateTimeSlots(); // Initialize time slots
+    </script>
+    <script src="https://kit.fontawesome.com/3ac512e62a.js" crossorigin="anonymous"></script>
+</body>
+
+</html>

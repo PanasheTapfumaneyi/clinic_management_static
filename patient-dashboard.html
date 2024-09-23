@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/output.css">
+    <style>
+        @font-face {
+            font-family: 'Aptos';
+            src: url('/fonts/Aptos.ttf') format('ttf'),
+        }
+
+        body {
+            font-family: 'Aptos';
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Custom active state styling for selected tab */
+        .active {
+            background-color: #14c0e0;
+            /* Tailwind green-600 */
+            color: white;
+        }
+    </style>
+</head>
+
+<body onload="showPage('dashboard.html')">
+    <!-- Navbar -->
+    <nav class="bg-secondary p-4 flex justify-between items-center text-white">
+        <div class="flex items-center">
+            <img src="/assets/Logo.jpg" alt="Logo" class="h-8 mr-2">
+            <h1 class="text-xl font-bold">Clinic Website</h1>
+        </div>
+        <div class="relative flex items-center">
+            <img src="/assets/Profile.png" alt="Admin" class="ml-4 h-10 w-10 rounded-full cursor-pointer"
+                onclick="toggleDropdown()">
+            <div id="profileDropdown"
+                class="absolute right-0 mt-48 w-48 bg-white rounded-lg shadow-lg hidden z-10 transition-all duration-200 ease-in-out">
+                <div class="flex items-center p-4 border-b border-gray-200">
+                    <img src="/assets/DoctorProfile.jpg" alt="Doctor" class="h-10 w-10 rounded-full mr-2">
+                    <div>
+                        <p class="font-semibold text-gray-500">Dr. John Doe</p>
+                        <p class="text-gray-500 text-sm">Cardiologist</p>
+                    </div>
+                </div>
+                <div class="p-2">
+                    <a href="/login-page.html"
+                        class="block px-4 py-2 text-gray-800 hover:bg-secondaryDark hover:text-white rounded-lg">Sign
+                        Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white p-4 h-screen shadow-md">
+            <ul id="sidebar" class="space-y-8">
+                <li><a href="#" class="flex items-center p-2 hover:bg-secondaryDark rounded-lg"
+                        onclick="showPage('patient-selected-dashboard.html', this)"><i class="fa-solid fa-bars"></i>
+                        <span class="ml-2">Dashboard</span></a></li>
+                <li><a href="#" class="flex items-center p-2 hover:bg-secondaryDark rounded-lg"
+                        onclick="showPage('patient-appointments.html', this)"><i
+                            class="fa-solid fa-calendar-check"></i><span class="ml-2">Appointments</span></a></li>
+                <li><a href="#" class="flex items-center p-2 hover:bg-secondaryDark rounded-lg"
+                        onclick="showPage('patients-section.html', this)"><i class="fa-solid fa-book"></i><span
+                            class="ml-2">Records</span></a></li>
+                <li><a href="#" class="flex items-center p-2 hover:bg-secondaryDark rounded-lg"
+                        onclick="showPage('patient-messages.html', this)"><i class="fa-solid fa-message"></i><span
+                            class="ml-2">Messages</span></a></li>
+                <li><a href="#" class="flex items-center p-2 hover:bg-secondaryDark rounded-lg"
+                        onclick="showPage('patient-prescriptions.html' , this)"><i class="fa-solid fa-pen"></i><span
+                            class="ml-2">Prescriptions</span></a></li>
+
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="content-area" class="flex-1 p-8">
+
+            <h1 class="text-center text-4xl">Welcome To Your Dashboard, Mr. </h1>
+        </main>
+    </div>
+
+
+
+    <script>
+
+        // Mock prescription data for the patient
+        const prescriptions = [
+            { prescriptionID: 'RX001', doctorName: 'Dr. John Doe', description: 'Take one tablet daily', dateIssued: '2024-09-01' },
+            { prescriptionID: 'RX002', doctorName: 'Dr. Emily Clark', description: 'Apply ointment twice daily', dateIssued: '2024-09-02' }
+            // Add more data here
+        ];
+
+        // Load prescription data into the table
+        function loadPrescriptions() {
+            const tbody = document.getElementById('prescriptionsTableBody');
+            tbody.innerHTML = ''; // Clear previous data
+            prescriptions.forEach(prescription => {
+                const row = `
+            <tr>
+                <td class="p-4 border-b">${prescription.prescriptionID}</td>
+                <td class="p-4 border-b">${prescription.doctorName}</td>
+                <td class="p-4 border-b">${prescription.description}</td>
+                <td class="p-4 border-b">${prescription.dateIssued}</td>
+            </tr>
+        `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Call this function when page loads to initialize prescription data
+        loadPrescriptions();
+
+        // Function to handle searching prescriptions
+        function searchPrescriptions() {
+            const query = document.getElementById('searchPrescriptionInput').value.toLowerCase();
+            const filteredPrescriptions = prescriptions.filter(prescription => {
+                return (
+                    prescription.doctorName.toLowerCase().includes(query) ||
+                    prescription.description.toLowerCase().includes(query) ||
+                    prescription.dateIssued.includes(query)
+                );
+            });
+            updatePrescriptionTable(filteredPrescriptions);
+        }
+
+        // Function to update the table based on search
+        function updatePrescriptionTable(filteredPrescriptions) {
+            const tbody = document.getElementById('prescriptionsTableBody');
+            tbody.innerHTML = ''; // Clear previous data
+            filteredPrescriptions.forEach(prescription => {
+                const row = `
+            <tr>
+                <td class="p-4 border-b">${prescription.prescriptionID}</td>
+                <td class="p-4 border-b">${prescription.doctorName}</td>
+                <td class="p-4 border-b">${prescription.description}</td>
+                <td class="p-4 border-b">${prescription.dateIssued}</td>
+            </tr>
+        `;
+                tbody.innerHTML += row;
+            });
+        }
+        // Mock available days and times (to be replaced with dynamic data from the database)
+        const availableDays = ['2024-09-27', '2024-09-28', '2024-09-29'];
+        const availableTimes = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+        // Mock scheduled appointments data (to be replaced with dynamic data from the database)
+        let scheduledAppointments = [
+            { service: 'General Checkup', date: '2024-09-25', time: '10:00 AM', provider: 'GP', status: 'Confirmed' },
+            { service: 'Follow-up', date: '2024-09-26', time: '2:00 PM', provider: 'Nurse Practitioner', status: 'Pending' }
+        ];
+
+        // Load scheduled appointments into the table
+        function loadScheduledAppointments() {
+            const tbody = document.getElementById('scheduledAppointmentsTable');
+            tbody.innerHTML = ''; // Clear previous data
+            scheduledAppointments.forEach(appointment => {
+                const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.date}</td>
+                    <td class="p-4 border-b">${appointment.time}</td>
+                    <td class="p-4 border-b">${appointment.provider}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                </tr>
+            `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Call this function when the page loads to initialize appointments data
+        loadScheduledAppointments();
+
+        // Open Request Appointment modal
+        function openRequestAppointmentPopup() {
+            document.getElementById('requestAppointmentModal').classList.remove('hidden');
+            loadAvailableDaysAndTimes(); // Load available days and times dynamically
+        }
+
+        // Close Request Appointment modal
+        function closeRequestAppointmentPopup() {
+            document.getElementById('requestAppointmentModal').classList.add('hidden');
+        }
+
+
+
+        // Load available days and times into the form
+        function loadAvailableDaysAndTimes() {
+            const daySelect = document.getElementById('appointmentDay');
+            const timeSelect = document.getElementById('appointmentTime');
+
+            // Populate available days
+            daySelect.innerHTML = availableDays.map(day => `<option value="${day}">${day}</option>`).join('');
+
+            // Populate available times
+            timeSelect.innerHTML = availableTimes.map(time => `<option value="${time}">${time}</option>`).join('');
+        }
+
+        // Handle Request Appointment form submission
+        document.getElementById('requestAppointmentForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission reload
+
+            // Get values from the form inputs
+            const provider = document.getElementById('appointmentProvider').value;
+            const day = document.getElementById('appointmentDay').value;
+            const time = document.getElementById('appointmentTime').value;
+
+            // Create new appointment object
+            const newAppointment = {
+                service: 'Requested Appointment',
+                date: day,
+                time: time,
+                provider: provider,
+                status: 'Pending'
+            };
+
+            // Add new appointment to the array
+            scheduledAppointments.push(newAppointment);
+
+            // Close the modal
+            closeRequestAppointmentPopup();
+
+            // Refresh the table to include the new appointment
+            loadScheduledAppointments();
+        });
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Optional: Close dropdown if clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('.cursor-pointer')) {
+                const dropdowns = document.getElementsByClassName("hidden");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    dropdowns[i].classList.add('hidden');
+                }
+            }
+        };
+
+        // Mock appointment data
+        let appointments = [
+            { service: 'General Checkup', charges: '$100', paymentMode: 'Cash', status: 'Completed' },
+            { service: 'Dental Cleaning', charges: '$200', paymentMode: 'Credit Card', status: 'Pending' }
+        ];
+
+
+
+        // Function to load patients into the list
+        function loadPatients() {
+            const patientsList = document.getElementById('patientsList');
+            patientsList.innerHTML = '';
+            patients.forEach(patient => {
+                const patientItem = document.createElement('div');
+                patientItem.classList.add('p-2 border-b cursor-pointer');
+                patientItem.textContent = patient.name;
+                patientItem.onclick = () => selectPatient(patient);
+                patientsList.appendChild(patientItem);
+            });
+        }
+
+        // Function to search patients
+        function searchPatients() {
+            const query = document.getElementById('searchPatientInput').value.toLowerCase();
+            const filteredPatients = patients.filter(patient => patient.name.toLowerCase().includes(query));
+            const patientsList = document.getElementById('patientsList');
+            patientsList.innerHTML = '';
+            filteredPatients.forEach(patient => {
+                const patientItem = document.createElement('div');
+                patientItem.classList.add('p-2 border-b cursor-pointer');
+                patientItem.textContent = patient.name;
+                patientItem.onclick = () => selectPatient(patient);
+                patientsList.appendChild(patientItem);
+            });
+        }
+
+        let selectedPatient = null;
+
+        // Function to select a patient
+        function selectPatient(patient) {
+            selectedPatient = patient;
+            document.getElementById('messageContent').placeholder = `Message to ${patient.name}`;
+        }
+
+        // Function to send a message
+        function sendMessage() {
+            if (!selectedPatient) {
+                alert('Please select a patient first.');
+                return;
+            }
+            const messageContent = document.getElementById('messageContent').value;
+            if (!messageContent) {
+                alert('Message cannot be empty.');
+                return;
+            }
+
+            const messagesList = document.getElementById('messagesList');
+            const messageItem = document.createElement('li');
+            messageItem.textContent = `To ${selectedPatient.name}: ${messageContent}`;
+            messagesList.appendChild(messageItem);
+            document.getElementById('messageContent').value = ''; // Clear the message input
+        }
+
+        // Call this function to load patients when the page loads
+        loadPatients();
+
+        function toggleDrawer() {
+            const drawer = document.getElementById('quick-actions-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        function openNewAppointmentForm() {
+            document.getElementById('new-appointment-form').classList.remove('hidden');
+        }
+
+        function closeNewAppointmentForm() {
+            document.getElementById('new-appointment-form').classList.add('hidden');
+        }
+
+        function openPrescriptionForm() {
+            document.getElementById('prescription-form').classList.remove('hidden');
+        }
+
+        function closePrescriptionForm() {
+            document.getElementById('prescription-form').classList.add('hidden');
+        }
+
+        function openPatientSearch() {
+            document.getElementById('patient-search').classList.remove('hidden');
+        }
+
+        function closePatientSearch() {
+            document.getElementById('patient-search').classList.add('hidden');
+        }
+
+        function replyMessage() {
+            // Add your reply message logic here
+        }
+
+        function viewFullMessage() {
+            // Add your view full message logic here
+        }
+
+
+
+        // Load prescription data into the table
+        function loadPrescriptions() {
+            const tbody = document.getElementById('prescriptionsTableBody');
+            if (!tbody) {
+                console.error('Error: prescriptionsTableBody element not found');
+                return;
+            }
+            tbody.innerHTML = ''; // Clear previous data
+            prescriptions.forEach(prescription => {
+                const row = `
+        <tr>
+            <td class="p-4 border-b">${prescription.prescriptionID}</td>
+            <td class="p-4 border-b">${prescription.doctorName}</td>
+            <td class="p-4 border-b">${prescription.patientName}</td>
+            <td class="p-4 border-b">${prescription.description}</td>
+            <td class="p-4 border-b">${prescription.dateIssued}</td>
+            <td class="p-4 border-b"><button class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+        </tr>
+        `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Function to handle searching prescriptions
+        function searchPrescriptions() {
+            const query = document.getElementById('searchPrescriptionInput').value.toLowerCase();
+            const filteredPrescriptions = prescriptions.filter(prescription => {
+                return (
+                    prescription.doctorName.toLowerCase().includes(query) ||
+                    prescription.patientName.toLowerCase().includes(query) ||
+                    prescription.dateIssued.includes(query)
+                );
+            });
+            updatePrescriptionTable(filteredPrescriptions);
+        }
+
+        // Function to update the table based on search or filter
+        function updatePrescriptionTable(filteredPrescriptions) {
+            const tbody = document.getElementById('prescriptionsTableBody');
+            tbody.innerHTML = ''; // Clear previous data
+            filteredPrescriptions.forEach(prescription => {
+                const row = `
+        <tr>
+            <td class="p-4 border-b">${prescription.prescriptionID}</td>
+            <td class="p-4 border-b">${prescription.doctorName}</td>
+            <td class="p-4 border-b">${prescription.patientName}</td>
+            <td class="p-4 border-b">${prescription.description}</td>
+            <td class="p-4 border-b">${prescription.dateIssued}</td>
+            <td class="p-4 border-b"><button class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+        </tr>
+        `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Function to open the Add Prescription popup
+        function openAddPrescriptionPopup() {
+            document.getElementById('addPrescriptionModal').classList.remove('hidden');
+        }
+
+        // Function to close the Add Prescription popup
+        function closeAddPrescriptionPopup() {
+            document.getElementById('addPrescriptionModal').classList.add('hidden');
+        }
+
+        // Function to add a new prescription
+        function addPrescription() {
+            const doctorName = document.getElementById('doctorName').value;
+            const patientName = document.getElementById('patientName').value;
+            const prescriptionDescription = document.getElementById('prescriptionDescription').value;
+            const dateIssued = document.getElementById('dateIssued').value;
+
+            prescriptions.push({
+                prescriptionID: 'RX' + (prescriptions.length + 1).toString().padStart(3, '0'),
+                doctorName,
+                patientName,
+                description: prescriptionDescription,
+                dateIssued
+            });
+
+            loadPrescriptions(); // Reload the table with new prescription data
+            closeAddPrescriptionPopup(); // Close the popup
+        }
+
+        // Call this function when the page loads to initialize prescription data
+        loadPrescriptions();
+
+
+
+
+
+
+
+        function updatePatientTable(filteredPatients) {
+            const tbody = document.getElementById('patientsTableBody');
+            tbody.innerHTML = ''; // Clear previous data
+            filteredPatients.forEach(patient => {
+                const row = `
+                    <tr>
+                        <td class="p-4 border-b">${patient.id}</td>
+                        <td class="p-4 border-b">${patient.name}</td>
+                        <td class="p-4 border-b">${patient.clinic}</td>
+                        <td class="p-4 border-b">${patient.email}</td>
+                        <td class="p-4 border-b">${patient.mobile}</td>
+                        <td class="p-4 border-b">${patient.registeredOn}</td>
+                        <td class="p-4 border-b">${patient.status}</td>
+                        <td class="p-4 border-b"><button class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function showPage(page, element) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.add('hidden'));
+            document.getElementById(page.split('.')[0]).classList.remove('hidden');
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
+            if (page === 'patients-section.html') {
+                loadPatients();
+            } else if (page === 'patients-section.html') {
+                loadDoctors();
+            }
+        }
+
+        // Global variable to store the selected doctor
+        let selectedDoctor = null;
+
+        // Function to select a doctor
+        function selectDoctor(doctor) {
+            selectedDoctor = doctor;
+            document.getElementById('messageContent').placeholder = `Message to Dr. ${doctor.name}`;
+            document.getElementById('conversationArea').classList.remove('hidden');
+            loadMessagesForDoctor(doctor); // Optionally load messages for the selected doctor
+        }
+
+        // Function to send a message
+        function sendMessage() {
+            if (!selectedDoctor) {
+                alert('Please select a doctor first.');
+                return;
+            }
+            const messageContent = document.getElementById('messageContent').value;
+            if (!messageContent) {
+                alert('Message cannot be empty.');
+                return;
+            }
+
+            const messagesList = document.getElementById('messagesList');
+            const messageItem = document.createElement('li');
+            messageItem.textContent = `To Dr. ${selectedDoctor.name}: ${messageContent}`;
+            messagesList.appendChild(messageItem);
+
+            document.getElementById('messageContent').value = ''; // Clear the message input
+        }
+
+        // Function to load doctors (similar to loadPatients)
+        function loadDoctors() {
+            // Fetch doctor data from the server or database (mock data for now)
+            const doctors = [
+                { id: 1, name: 'John Doe', specialization: 'Cardiologist' },
+                { id: 2, name: 'Emily Clark', specialization: 'Dermatologist' }
+            ];
+
+            const doctorsList = document.getElementById('doctorsList');
+            doctorsList.innerHTML = ''; // Clear the previous list
+
+            doctors.forEach(doctor => {
+                const doctorItem = document.createElement('div');
+                doctorItem.className = 'cursor-pointer p-2 bg-white rounded-lg shadow hover:bg-gray-200';
+                doctorItem.textContent = `Dr. ${doctor.name} - ${doctor.specialization}`;
+                doctorItem.onclick = () => selectDoctor(doctor); // Attach click event to select a doctor
+                doctorsList.appendChild(doctorItem);
+            });
+        }
+
+        // Function to search for doctors based on user input
+        function searchDoctorsForMessages() {
+            const query = document.getElementById('searchDoctorInput').value.toLowerCase();
+
+            // Filter logic here (use mock data or fetched data)
+            const filteredDoctors = doctors.filter(doctor =>
+                doctor.name.toLowerCase().includes(query)
+            );
+
+            // Update the doctor list based on the search query
+            updateDoctorList(filteredDoctors);
+        }
+
+        // Function to update the doctor list based on the search
+        function updateDoctorList(doctors) {
+            const doctorsList = document.getElementById('doctorsList');
+            doctorsList.innerHTML = ''; // Clear the list
+
+            doctors.forEach(doctor => {
+                const doctorItem = document.createElement('div');
+                doctorItem.className = 'cursor-pointer p-2 bg-white rounded-lg shadow hover:bg-gray-200';
+                doctorItem.textContent = `Dr. ${doctor.name} - ${doctor.specialization}`;
+                doctorItem.onclick = () => selectDoctor(doctor); // Attach click event to select doctor
+                doctorsList.appendChild(doctorItem);
+            });
+        }
+
+        // Optionally, function to load messages for the selected doctor
+        function loadMessagesForDoctor(doctor) {
+            // Mock message data (replace with data from the database)
+            const messages = [
+                `Dr. ${doctor.name}: Please take your medication twice a day.`,
+                `Me: Thank you for the instructions.`
+            ];
+
+            const messagesList = document.getElementById('messagesList');
+            messagesList.innerHTML = ''; // Clear previous messages
+
+            messages.forEach(message => {
+                const messageItem = document.createElement('li');
+                messageItem.textContent = message;
+                messagesList.appendChild(messageItem);
+            });
+        }
+
+        // Call this function to load doctors when the page loads
+        loadDoctors();
+
+
+
+
+
+
+        // Display initial messages on load
+        window.onload = function () {
+            loadPatients();
+            displayMessages(); // Add this line to display initial messages
+            selectPatient(patient);
+            searchPatientsForMessages()
+        };
+
+
+
+
+
+
+        // Load appointment data into the table
+        function loadAppointments() {
+            const tbody = document.getElementById('appointmentsTableBody');
+            if (!tbody) {
+                console.error('Error: appointmentsTableBody element not found');
+                return;
+            }
+            tbody.innerHTML = ''; // Clear previous data
+            appointments.forEach((appointment, index) => {
+                const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.charges}</td>
+                    <td class="p-4 border-b">${appointment.paymentMode}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                    <td class="p-4 border-b">
+                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg" onclick="deleteAppointment(${index})">Delete</button>
+                    </td>
+                </tr>
+            `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Call this function when the page loads to initialize data
+        document.addEventListener('DOMContentLoaded', function () {
+            loadPatients(); // Initialize patient data
+            loadAppointments(); // Initialize appointment data
+            loadPrescriptions(); // Initialize clinics data
+        });
+
+        // Handle Add Appointment form submission
+        document.getElementById('addAppointmentForm')?.addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission reload
+
+            // Get values from the form inputs
+            const service = document.getElementById('appointmentService').value;
+            const charges = document.getElementById('appointmentCharges').value;
+            const paymentMode = document.getElementById('appointmentPaymentMode').value;
+            const status = document.getElementById('appointmentStatus').value;
+
+            // Add the new appointment to the array
+            appointments.push({
+                service: service,
+                charges: `$${charges}`,  // Formatting charges to include $
+                paymentMode: paymentMode,
+                status: status
+            });
+
+            // Close the modal
+            closeAddAppointmentPopup();
+
+            // Clear form fields
+            document.getElementById('addAppointmentForm').reset();
+
+            // Refresh the table to include the new appointment
+            loadAppointments();
+        });
+
+        // Function to open Add Appointment modal
+        function openAddAppointmentPopup() {
+            document.getElementById('addAppointmentModal').classList.remove('hidden');
+        }
+
+        // Function to close Add Appointment modal
+        function closeAddAppointmentPopup() {
+            document.getElementById('addAppointmentModal').classList.add('hidden');
+        }
+
+        // Function to delete an appointment
+        function deleteAppointment(index) {
+            appointments.splice(index, 1); // Remove the appointment from the array
+            loadAppointments(); // Reload the table
+        }
+
+        // Function to handle search functionality (already in place)
+        function searchAppointments() {
+            const query = document.getElementById('searchAppointmentInput').value.toLowerCase();
+            const filteredAppointments = appointments.filter(appointment => {
+                return (
+                    appointment.service.toLowerCase().includes(query) ||
+                    appointment.paymentMode.toLowerCase().includes(query) ||
+                    appointment.status.toLowerCase().includes(query)
+                );
+            });
+            updateAppointmentTable(filteredAppointments);
+        }
+
+        // Function to update the table with filtered appointments (used by search)
+        function updateAppointmentTable(filteredAppointments) {
+            const tbody = document.getElementById('appointmentsTableBody');
+            tbody.innerHTML = ''; // Clear previous data
+            filteredAppointments.forEach((appointment, index) => {
+                const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.charges}</td>
+                    <td class="p-4 border-b">${appointment.paymentMode}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                    <td class="p-4 border-b">
+                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg" onclick="deleteAppointment(${index})">Delete</button>
+                    </td>
+                </tr>
+            `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load the initial page
+            const initialPage = 'dashboard.html';
+            const initialTab = document.querySelector('#sidebar li a'); // Adjust if you have a specific tab to activate
+            showPage(initialPage, initialTab); // Call showPage with the initial page and tab
+        });
+
+        // Show Page Function (Fixes Active Tab and Content Loading) 
+        function showPage(pageUrl, element) {
+            const contentArea = document.getElementById('content-area');
+            const tabs = document.querySelectorAll('#sidebar li a');
+
+            // Remove active class from all tabs
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Add active class to the clicked tab
+            element.classList.add('active');
+
+            // Fetch the content of the new page
+            fetch(pageUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Page not found');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    // Clear the content area before injecting new content
+                    contentArea.innerHTML = '';
+
+                    // Inject the fetched HTML content into the content area
+                    contentArea.innerHTML = data;
+
+                    // After content is injected, scroll to top of the page (optional)
+                    window.scrollTo(0, 0);
+
+                    // Call function to initialize page-specific JavaScript after loading
+                    if (pageUrl.includes('appointments-section.html')) {
+                        loadAppointments(); // Initialize appointments JS logic
+                    } else if (pageUrl.includes('patients-section.html')) {
+                        loadPatients();
+                    }
+                })
+                .catch(error => {
+                    contentArea.innerHTML = '<p>Error loading page.</p>';
+                    console.error('Error:', error);
+                });
+        }
+
+    </script>
+    <script src="https://kit.fontawesome.com/3ac512e62a.js" crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>

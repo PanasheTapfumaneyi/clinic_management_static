@@ -1,0 +1,39 @@
+<!-- Messages Section -->
+<section id="messages" class="page flex">
+    <!-- Contact List -->
+    <div class="w-1/3 bg-gray-100 p-4 rounded-l-lg shadow overflow-y-auto">
+        <h3 class="text-lg font-semibold mb-4">Doctors</h3>
+        <button class="bg-gray-500 text-white px-4 py-2 rounded-lg mb-4" onclick="loadDoctors()">Refresh List</button>
+        <input type="text" id="searchDoctorInput" placeholder="Search Doctors..."
+            class="border border-gray-300 p-2 w-full rounded-lg mb-4" oninput="searchDoctorsForMessages()">
+        <div id="doctorsList" class="space-y-2">
+            <!-- Doctor list will be populated here -->
+        </div>
+    </div>
+
+    <!-- Messages Display -->
+    <div class="w-2/3 bg-white p-6 rounded-r-lg shadow">
+        <h2 class="text-xl font-semibold" id="doctorName">Select a doctor</h2>
+        <div id="conversationArea" class="hidden">
+            <div class="flex justify-between mb-4">
+                <!-- Add Refresh Button here -->
+                <button class="bg-gray-500 text-white px-4 py-2 rounded-lg"
+                    onclick="loadMessagesForDoctor(selectedDoctor)">Refresh</button>
+            </div>
+            <div id="messagesHistory" class="mb-4">
+                <h3 class="text-lg font-semibold">Messages History</h3>
+                <ul id="messagesList" class="list-disc pl-5">
+                    <!-- Messages will be displayed here -->
+                </ul>
+            </div>
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold">Send Message</h3>
+                <textarea id="messageContent" rows="4" class="border border-gray-300 p-2 w-full rounded-lg"
+                    placeholder="Type your message here..."></textarea>
+                <div class="flex justify-end mt-2">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,163 @@
+<!-- Appointments Section -->
+<section id="appointments" class="page">
+    <div class="bg-white p-6 rounded-lg shadow">
+        <!-- Title -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Scheduled Appointments</h2>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-left table-auto border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border-b p-4">Service</th>
+                        <th class="border-b p-4">Date</th>
+                        <th class="border-b p-4">Time</th>
+                        <th class="border-b p-4">Provider</th>
+                        <th class="border-b p-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduledAppointmentsTable">
+                    <!-- Scheduled appointment data will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Request Appointment Button -->
+        <div class="flex justify-end mb-4">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" onclick="openRequestAppointmentPopup()">Request
+                New Appointment</button>
+        </div>
+
+        <!-- Pagination (if needed) -->
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="previousPage()">Previous</button>
+                <input type="number" id="currentPage" class="border border-gray-300 p-2 w-16 rounded-lg text-center"
+                    value="1">
+                <span>/</span>
+                <span id="totalPages">5</span>
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="nextPage()">Next</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Request Appointment Modal -->
+<div id="requestAppointmentModal"
+    class="fixed z-50 inset-0 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <h2 class="text-xl font-semibold mb-4">Request Appointment</h2>
+        <form id="requestAppointmentForm">
+            <div class="mb-4">
+                <label for="appointmentProvider" class="block text-gray-700">Choose Provider</label>
+                <select id="appointmentProvider" class="border border-gray-300 p-2 w-full rounded-lg">
+                    <option value="GP">GP</option>
+                    <option value="Nurse Practitioner">Nurse Practitioner</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="appointmentDay" class="block text-gray-700">Select Day</label>
+                <select id="appointmentDay" class="border border-gray-300 p-2 w-full rounded-lg">
+                    <!-- Dynamic list of available days will be populated here -->
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="appointmentTime" class="block text-gray-700">Select Time</label>
+                <select id="appointmentTime" class="border border-gray-300 p-2 w-full rounded-lg">
+                    <!-- Dynamic list of available times will be populated here -->
+                </select>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg mr-2"
+                    onclick="closeRequestAppointmentPopup()">Cancel</button>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg">Request Appointment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Mock scheduled appointments data (to be replaced with dynamic data from the database)
+    let scheduledAppointments = [
+        { service: 'General Checkup', date: '2024-09-25', time: '10:00 AM', provider: 'GP', status: 'Confirmed' },
+        { service: 'Follow-up', date: '2024-09-26', time: '2:00 PM', provider: 'Nurse Practitioner', status: 'Pending' }
+    ];
+
+    // Load scheduled appointments into the table
+    function loadScheduledAppointments() {
+        const tbody = document.getElementById('scheduledAppointmentsTable');
+        tbody.innerHTML = ''; // Clear previous data
+        scheduledAppointments.forEach(appointment => {
+            const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.date}</td>
+                    <td class="p-4 border-b">${appointment.time}</td>
+                    <td class="p-4 border-b">${appointment.provider}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Call this function when the page loads to initialize appointments data
+    loadScheduledAppointments();
+
+    // Open Request Appointment modal
+    function openRequestAppointmentPopup() {
+        document.getElementById('requestAppointmentModal').classList.remove('hidden');
+        loadAvailableDaysAndTimes(); // Load available days and times dynamically
+    }
+
+    // Close Request Appointment modal
+    function closeRequestAppointmentPopup() {
+        document.getElementById('requestAppointmentModal').classList.add('hidden');
+    }
+
+    // Mock available days and times (to be replaced with dynamic data from the database)
+    const availableDays = ['2024-09-27', '2024-09-28', '2024-09-29'];
+    const availableTimes = ['9:00 AM', '11:00 AM', '1:00 PM', '3:00 PM'];
+
+    // Load available days and times into the form
+    function loadAvailableDaysAndTimes() {
+        const daySelect = document.getElementById('appointmentDay');
+        const timeSelect = document.getElementById('appointmentTime');
+
+        // Populate available days
+        daySelect.innerHTML = availableDays.map(day => `<option value="${day}">${day}</option>`).join('');
+
+        // Populate available times
+        timeSelect.innerHTML = availableTimes.map(time => `<option value="${time}">${time}</option>`).join('');
+    }
+
+    // Handle Request Appointment form submission
+    document.getElementById('requestAppointmentForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent form submission reload
+
+        // Get values from the form inputs
+        const provider = document.getElementById('appointmentProvider').value;
+        const day = document.getElementById('appointmentDay').value;
+        const time = document.getElementById('appointmentTime').value;
+
+        // Create new appointment object
+        const newAppointment = {
+            service: 'Requested Appointment',
+            date: day,
+            time: time,
+            provider: provider,
+            status: 'Pending'
+        };
+
+        // Add new appointment to the array
+        scheduledAppointments.push(newAppointment);
+
+        // Close the modal
+        closeRequestAppointmentPopup();
+
+        // Refresh the table to include the new appointment
+        loadScheduledAppointments();
+    });
+</script>

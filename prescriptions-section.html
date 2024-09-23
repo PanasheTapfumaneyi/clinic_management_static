@@ -1,0 +1,202 @@
+<section id="prescriptions" class="page">
+    <div class="bg-white p-6 rounded-lg shadow">
+        <!-- Title and Action Buttons -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Prescription List</h2>
+            <div class="flex space-x-2">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" onclick="importPrescriptionData()">Import
+                    from Spreadsheet</button>
+                <button class="bg-green-500 text-white px-4 py-2 rounded-lg" onclick="openAddPrescriptionPopup()">Add
+                    Prescription</button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <input type="text" id="searchPrescriptionInput" class="border border-gray-300 p-2 w-full rounded-lg"
+                placeholder="Search by Doctor, Patient, or Date" oninput="searchPrescriptions()">
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left table-auto border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border-b p-4">Prescription ID</th>
+                        <th class="border-b p-4">Doctor Name</th>
+                        <th class="border-b p-4">Patient Name</th>
+                        <th class="border-b p-4">Prescription Description</th>
+                        <th class="border-b p-4">Date Issued</th>
+                        <th class="border-b p-4">Action</th>
+                    </tr>
+                    <!-- Filters Row -->
+                    <tr>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Prescription ID"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Doctor Name"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Patient Name"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Description"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Date"></td>
+                        <td class="p-2"></td>
+                    </tr>
+                </thead>
+                <tbody id="prescriptionsTableBody">
+                    <!-- Prescription rows will go here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination and Rows per Page -->
+        <div class="flex justify-between items-center mt-4">
+            <div>
+                <label for="prescriptionRowsPerPage" class="mr-2">Rows per page:</label>
+                <select id="prescriptionRowsPerPage" class="border border-gray-300 p-2 rounded-lg"
+                    onchange="changePrescriptionRowsPerPage()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="previousPrescriptionPage()">Previous</button>
+                <input type="number" id="prescriptionCurrentPage"
+                    class="border border-gray-300 p-2 w-16 rounded-lg text-center" value="1"
+                    onchange="goToPrescriptionPage()">
+                <span>/</span>
+                <span id="prescriptionTotalPages">5</span>
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="nextPrescriptionPage()">Next</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Prescription Modal -->
+<div id="addPrescriptionModal"
+    class="fixed z-50 inset-0 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <h2 class="text-xl font-semibold mb-4">Add Prescription</h2>
+        <form id="addPrescriptionForm" onsubmit="addPrescription(); return false;">
+            <div class="mb-4">
+                <label for="doctorName" class="block text-gray-700">Doctor Name</label>
+                <input type="text" id="doctorName" class="border border-gray-300 p-2 w-full rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="patientName" class="block text-gray-700">Patient Name</label>
+                <input type="text" id="patientName" class="border border-gray-300 p-2 w-full rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="prescriptionDescription" class="block text-gray-700">Prescription Description</label>
+                <textarea id="prescriptionDescription" class="border border-gray-300 p-2 w-full rounded-lg"
+                    required></textarea>
+            </div>
+            <div class="mb-4">
+                <label for="dateIssued" class="block text-gray-700">Date Issued</label>
+                <input type="date" id="dateIssued" class="border border-gray-300 p-2 w-full rounded-lg" required>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg mr-2"
+                    onclick="closeAddPrescriptionPopup()">Cancel</button>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add Prescription</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Mock prescription data
+    const prescriptions = [
+        { prescriptionID: 'RX001', doctorName: 'Dr. John Doe', patientName: 'Jane Smith', description: 'Take one tablet daily', dateIssued: '2024-09-01' },
+        { prescriptionID: 'RX002', doctorName: 'Dr. Emily Clark', patientName: 'John Johnson', description: 'Apply ointment twice daily', dateIssued: '2024-09-02' }
+        // Add more data here
+    ];
+
+    // Load prescription data into the table
+    function loadPrescriptions() {
+        const tbody = document.getElementById('prescriptionsTableBody');
+        tbody.innerHTML = ''; // Clear previous data
+        prescriptions.forEach(prescription => {
+            const row = `
+            <tr>
+                <td class="p-4 border-b">${prescription.prescriptionID}</td>
+                <td class="p-4 border-b">${prescription.doctorName}</td>
+                <td class="p-4 border-b">${prescription.patientName}</td>
+                <td class="p-4 border-b">${prescription.description}</td>
+                <td class="p-4 border-b">${prescription.dateIssued}</td>
+                <td class="p-4 border-b"><button class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+            </tr>
+        `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Call this function when page loads to initialize prescription data
+    loadPrescriptions();
+
+    // Function to handle searching prescriptions
+    function searchPrescriptions() {
+        const query = document.getElementById('searchPrescriptionInput').value.toLowerCase();
+        const filteredPrescriptions = prescriptions.filter(prescription => {
+            return (
+                prescription.doctorName.toLowerCase().includes(query) ||
+                prescription.patientName.toLowerCase().includes(query) ||
+                prescription.dateIssued.includes(query)
+            );
+        });
+        updatePrescriptionTable(filteredPrescriptions);
+    }
+
+    // Function to update the table based on search or filter
+    function updatePrescriptionTable(filteredPrescriptions) {
+        const tbody = document.getElementById('prescriptionsTableBody');
+        tbody.innerHTML = ''; // Clear previous data
+        filteredPrescriptions.forEach(prescription => {
+            const row = `
+            <tr>
+                <td class="p-4 border-b">${prescription.prescriptionID}</td>
+                <td class="p-4 border-b">${prescription.doctorName}</td>
+                <td class="p-4 border-b">${prescription.patientName}</td>
+                <td class="p-4 border-b">${prescription.description}</td>
+                <td class="p-4 border-b">${prescription.dateIssued}</td>
+                <td class="p-4 border-b"><button class="bg-red-500 text-white px-3 py-1 rounded-lg">Delete</button></td>
+            </tr>
+        `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Function to open the Add Prescription popup
+    function openAddPrescriptionPopup() {
+        document.getElementById('addPrescriptionModal').classList.remove('hidden');
+    }
+
+    // Function to close the Add Prescription popup
+    function closeAddPrescriptionPopup() {
+        document.getElementById('addPrescriptionModal').classList.add('hidden');
+    }
+
+    // Function to add a new prescription (mock)
+    function addPrescription() {
+        const doctorName = document.getElementById('doctorName').value;
+        const patientName = document.getElementById('patientName').value;
+        const prescriptionDescription = document.getElementById('prescriptionDescription').value;
+        const dateIssued = document.getElementById('dateIssued').value;
+
+        // Add the new prescription to the data
+        prescriptions.push({
+            prescriptionID: 'RX' + (prescriptions.length + 1).toString().padStart(3, '0'),
+            doctorName,
+            patientName,
+            description: prescriptionDescription,
+            dateIssued
+        });
+
+        // Reload the prescription table
+        loadPrescriptions();
+
+        // Close the modal
+        closeAddPrescriptionPopup();
+    }
+</script>

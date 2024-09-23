@@ -1,0 +1,221 @@
+<!-- Appointments Section -->
+<section id="appointments" class="page">
+    <div class="bg-white p-6 rounded-lg shadow">
+        <!-- Title and Action Buttons -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Appointments List</h2>
+            <div class="flex space-x-2">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" onclick="importAppointmentData()">Import
+                    from Spreadsheet</button>
+                <button class="bg-green-500 text-white px-4 py-2 rounded-lg" onclick="openAddAppointmentPopup()">Add
+                    Appointment</button>
+            </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <input type="text" id="searchAppointmentInput" class="border border-gray-300 p-2 w-full rounded-lg"
+                placeholder="Search by Service, Payment Mode, or Status" oninput="searchAppointments()">
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left table-auto border-collapse">
+                <thead>
+                    <tr>
+                        <th class="border-b p-4">Services</th>
+                        <th class="border-b p-4">Charges</th>
+                        <th class="border-b p-4">Payment Mode</th>
+                        <th class="border-b p-4">Status</th>
+                        <th class="border-b p-4">Action</th>
+                    </tr>
+                    <!-- Filters Row -->
+                    <tr>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Services"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Charges"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Payment Mode"></td>
+                        <td class="p-2"><input type="text" class="border border-gray-300 p-1 w-full rounded-lg"
+                                placeholder="Filter Status"></td>
+                        <td class="p-2"></td>
+                    </tr>
+                </thead>
+                <tbody id="appointmentsTableBody">
+                    <!-- Data rows will go here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination and Rows per Page -->
+        <div class="flex justify-between items-center mt-4">
+            <div>
+                <label for="appointmentRowsPerPage" class="mr-2">Rows per page:</label>
+                <select id="appointmentRowsPerPage" class="border border-gray-300 p-2 rounded-lg"
+                    onchange="changeAppointmentRowsPerPage()">
+                    <option value="10">10</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="previousAppointmentPage()">Previous</button>
+                <input type="number" id="appointmentCurrentPage"
+                    class="border border-gray-300 p-2 w-16 rounded-lg text-center" value="1"
+                    onchange="goToAppointmentPage()">
+                <span>/</span>
+                <span id="appointmentTotalPages">5</span>
+                <button class="bg-gray-300 px-3 py-2 rounded-lg" onclick="nextAppointmentPage()">Next</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Appointment Modal -->
+<div id="addAppointmentModal" class="fixed z-50 inset-0 flex items-center justify-center hidden bg-black bg-opacity-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <h2 class="text-xl font-semibold mb-4">Add Appointment</h2>
+        <form id="addAppointmentForm">
+            <div class="mb-4">
+                <label for="appointmentService" class="block text-gray-700">Service</label>
+                <input type="text" id="appointmentService" class="border border-gray-300 p-2 w-full rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="appointmentCharges" class="block text-gray-700">Charges</label>
+                <input type="number" id="appointmentCharges" class="border border-gray-300 p-2 w-full rounded-lg">
+            </div>
+            <div class="mb-4">
+                <label for="appointmentPaymentMode" class="block text-gray-700">Payment Mode</label>
+                <select id="appointmentPaymentMode" class="border border-gray-300 p-2 w-full rounded-lg">
+                    <option value="Cash">Cash</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Insurance">Insurance</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="appointmentStatus" class="block text-gray-700">Status</label>
+                <select id="appointmentStatus" class="border border-gray-300 p-2 w-full rounded-lg">
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="flex justify-end">
+                <button type="button" class="bg-red-500 text-white px-4 py-2 rounded-lg mr-2"
+                    onclick="closeAddAppointmentPopup()">Cancel</button>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg">Add
+                    Appointment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Mock appointment data
+    let appointments = [
+        { service: 'General Checkup', charges: '$100', paymentMode: 'Cash', status: 'Completed' },
+        { service: 'Dental Cleaning', charges: '$200', paymentMode: 'Credit Card', status: 'Pending' }
+    ];
+
+    // Load appointment data into the table
+    function loadAppointments() {
+        const tbody = document.getElementById('appointmentsTableBody');
+        tbody.innerHTML = ''; // Clear previous data
+        appointments.forEach((appointment, index) => {
+            const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.charges}</td>
+                    <td class="p-4 border-b">${appointment.paymentMode}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                    <td class="p-4 border-b">
+                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg" onclick="deleteAppointment(${index})">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // Call this function when page loads to initialize appointment data
+    loadAppointments();
+
+    // Handle Add Appointment form submission
+    document.getElementById('addAppointmentForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent form submission reload
+
+        // Get values from the form inputs
+        const service = document.getElementById('appointmentService').value;
+        const charges = document.getElementById('appointmentCharges').value;
+        const paymentMode = document.getElementById('appointmentPaymentMode').value;
+        const status = document.getElementById('appointmentStatus').value;
+
+        // Add the new appointment to the array
+        appointments.push({
+            service: service,
+            charges: `$${charges}`,  // Formatting charges to include $
+            paymentMode: paymentMode,
+            status: status
+        });
+
+        // Close the modal
+        closeAddAppointmentPopup();
+
+        // Clear form fields
+        document.getElementById('addAppointmentForm').reset();
+
+        // Refresh the table to include the new appointment
+        loadAppointments();
+    });
+
+    // Function to open Add Appointment modal
+    function openAddAppointmentPopup() {
+        document.getElementById('addAppointmentModal').classList.remove('hidden');
+    }
+
+    // Function to close Add Appointment modal
+    function closeAddAppointmentPopup() {
+        document.getElementById('addAppointmentModal').classList.add('hidden');
+    }
+
+    // Function to delete an appointment
+    function deleteAppointment(index) {
+        appointments.splice(index, 1); // Remove the appointment from the array
+        loadAppointments(); // Reload the table
+    }
+
+    // Function to handle search functionality (already in place)
+    function searchAppointments() {
+        const query = document.getElementById('searchAppointmentInput').value.toLowerCase();
+        const filteredAppointments = appointments.filter(appointment => {
+            return (
+                appointment.service.toLowerCase().includes(query) ||
+                appointment.paymentMode.toLowerCase().includes(query) ||
+                appointment.status.toLowerCase().includes(query)
+            );
+        });
+        updateAppointmentTable(filteredAppointments);
+    }
+
+    // Function to update the table with filtered appointments (used by search)
+    function updateAppointmentTable(filteredAppointments) {
+        const tbody = document.getElementById('appointmentsTableBody');
+        tbody.innerHTML = ''; // Clear previous data
+        filteredAppointments.forEach((appointment, index) => {
+            const row = `
+                <tr>
+                    <td class="p-4 border-b">${appointment.service}</td>
+                    <td class="p-4 border-b">${appointment.charges}</td>
+                    <td class="p-4 border-b">${appointment.paymentMode}</td>
+                    <td class="p-4 border-b">${appointment.status}</td>
+                    <td class="p-4 border-b">
+                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg" onclick="deleteAppointment(${index})">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+
+</script>
